@@ -51,6 +51,12 @@ crashlytics-build.properties
 # Packed Addressables
 /[Aa]ssets/[Aa]ddressable[Aa]ssets[Dd]ata/**/[Bb]uildTarget
 
+# Unity build backup and temp
+*_BackUpThisFolder_ButDontShipItWithYourGame/
+*_BurstDebugInformation_DoNotShip/
+.utmp/
+android-libraries/
+
 # Backup files
 *.bak
 
