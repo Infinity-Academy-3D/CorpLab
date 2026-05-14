@@ -21,6 +21,7 @@ public class ForkliftController : MonoBehaviour
     [SerializeField] private float forkMaxHeight = 3f;
 
     private float forkCurrentHeight;
+    private Rigidbody forkRigidbody;
 
     private InputDevice rightController;
     private InputDevice leftController;
@@ -34,7 +35,11 @@ public class ForkliftController : MonoBehaviour
         TryGetControllers();
         if (blWheel != null) blWheelBaseRot = blWheel.localRotation;
         if (brWheel != null) brWheelBaseRot = brWheel.localRotation;
-        if (forkAssembly != null) forkCurrentHeight = forkAssembly.position.y;
+        if (forkAssembly != null)
+        {
+            forkCurrentHeight = forkAssembly.position.y;
+            forkRigidbody = forkAssembly.GetComponent<Rigidbody>();
+        }
     }
 
     public void Enter()
@@ -74,7 +79,7 @@ public class ForkliftController : MonoBehaviour
         HandleSteering();
     }
 
-    void LateUpdate()
+    void FixedUpdate()
     {
         if (!IsOccupied) return;
         HandleForks();
@@ -108,12 +113,21 @@ public class ForkliftController : MonoBehaviour
 
         // Controla via world Y para ignorar rotacao do Animator
         forkCurrentHeight = Mathf.Clamp(
-            forkCurrentHeight + forkDirection * forkSpeed * Time.deltaTime,
+            forkCurrentHeight + forkDirection * forkSpeed * Time.fixedDeltaTime,
             forkMinHeight, forkMaxHeight);
 
-        Vector3 pos = forkAssembly.position;
-        pos.y = forkCurrentHeight;
-        forkAssembly.position = pos;
+        if (forkRigidbody != null)
+        {
+            Vector3 target = forkRigidbody.position;
+            target.y = forkCurrentHeight;
+            forkRigidbody.MovePosition(target);
+        }
+        else
+        {
+            Vector3 pos = forkAssembly.position;
+            pos.y = forkCurrentHeight;
+            forkAssembly.position = pos;
+        }
     }
 
     void HandleSteering()
