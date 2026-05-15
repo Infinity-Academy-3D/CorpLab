@@ -22,6 +22,7 @@ public class ForkliftController : MonoBehaviour
 
     private float forkCurrentHeight;
     private Rigidbody forkRigidbody;
+    private CharacterController characterController;
 
     private InputDevice rightController;
     private InputDevice leftController;
@@ -40,6 +41,8 @@ public class ForkliftController : MonoBehaviour
             forkCurrentHeight = forkAssembly.position.y;
             forkRigidbody = forkAssembly.GetComponent<Rigidbody>();
         }
+
+        characterController = GetComponent<CharacterController>();
     }
 
     public void Enter()
@@ -95,7 +98,14 @@ public class ForkliftController : MonoBehaviour
         if (leftTrigger > triggerThreshold)  direction += leftTrigger;
 
         if (direction != 0f)
-            transform.Translate(Vector3.right * moveSpeed * direction * Time.deltaTime, Space.Self);
+        {
+            Vector3 move = transform.right * moveSpeed * direction * Time.deltaTime;
+
+            if (characterController != null && characterController.enabled)
+                characterController.Move(move);
+            else
+                transform.Translate(move, Space.World);
+        }
     }
 
     void HandleForks()
@@ -111,7 +121,6 @@ public class ForkliftController : MonoBehaviour
 
         if (forkDirection == 0f) return;
 
-        // Controla via world Y para ignorar rotacao do Animator
         forkCurrentHeight = Mathf.Clamp(
             forkCurrentHeight + forkDirection * forkSpeed * Time.fixedDeltaTime,
             forkMinHeight, forkMaxHeight);
